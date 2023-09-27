@@ -1,0 +1,17 @@
+1) Today I set up an active directory server in windows server 2022 with an evaluation license by using vmware workstation pro. 
+
+2) Among the couple of things I did today was set the virtual ethernet adapter to a static ip address in the 10.0.5.0/24 ipv4 range to go with my packet tracer lab mockup of the homelab I am building alongside my studies.
+
+3) I also changed the name of the server to a more recognizeable one (WINDOWSSERVER_2022) and added it to a new forest as a domain controller as well as a DNS server.
+
+4) Then I proceeded to edit the DNS settings on a windows 10 computer virtual machine, also in workstation pro, I configured the domain to join as Stevenslaboratory.com and for the DNS server to match the IP of my windows server 2022 domain controller.
+
+5) I also configured the DNS beforehand on my windows server 2022 domain controller to point to its loopback address at 127.0.0.1 for its primary DNS and 8.8.8.8 googles public DNS for any records that it does not cache locally.
+  
+6) I have taken the liberty to create an account in active directory users named after me, Steven B, and I set a password different from the administrator password for my personal use in my domain. I was then able to log on to the windows 10 machine as Steven B.
+
+7) Currently I am setting up a windows server 2019 machine to join in as well as a redundant domain controller with added functionality as a DHCP server even while I do not require DHCP on the 10.0.5.0/24 LAN but if I am able to implement a DHCP relay in the future I could use this for just that. meanwhile it will be inactive.
+  
+8) Another two machines I am hoping to configure eventually will be an Ubuntu linux server and a SLES linux server in due time but my juniper jncia & jncis studies may come first.
+
+9) I also added a windows 10 machine to the network 10.0.4.0/24 and a kali linux machine which I will use as my general purpose machine for remotely configuration in the future on the managemant network but I'm only going to disclose that much.    
