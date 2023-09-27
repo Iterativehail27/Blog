@@ -18,3 +18,5 @@
 
 
 Edit: I have successfully configured the windows server 2019 machine as a redundant active directory and DNS server I have confirmed this by shutting down the windows server 2022 machine and logging in with the windows 10 guests machine as the user Steven B, so active directory still functions even while the primary windows server 2022 virtual machine was shutdown.
+
+I did have to change the ethernet adapter settings on the windows 10 guest which required an administrative username and password to configure a secondary DNS server as the 10.0.5.2 windows server 2019's address. After that I pinged Stevenslaboratory.com and succeeded in pinging 10.0.5.2 as the resolved ip address instead of 10.0.5.1 which is the windows server 2022 primary server.
