@@ -15,3 +15,6 @@
 8) Another two machines I am hoping to configure eventually will be an Ubuntu linux server and a SLES linux server in due time but my juniper jncia & jncis studies may come first.
 
 9) I also added a windows 10 machine to the network 10.0.4.0/24 and a kali linux machine which I will use as my general purpose machine for remotely configuration in the future on the managemant network but I'm only going to disclose that much.    
+
+
+Edit: I have configured the windows server 2019 machine as a redundant active directory and DNS server I have confirmed this by shutting down the windows server 2022 machine and logging in with the windows 10 guests machine as the user Steven B, so active directory still functions even while the primary windows server 2022 virtual machine was shutdown.
