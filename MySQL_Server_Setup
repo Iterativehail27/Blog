@@ -1,0 +1,54 @@
+Today went by fairly quickly in a good way. I was heads down pouring over documentation trying to setup this SQL server because I knew that was the next challenge I wanted to give myself since setting up the FTPS server. I went to work at my day job and to tell you the truth 
+all I could think about was getting home and getting on the grind well, I'm glad I did. I found a couple guides online as well as the mysql documentation and even a stackoverflow forum for troubleshooting very helpful.
+From each resource I was able to piece together a little bit more of the puzzle pieces till I got the full picture. as in the last one and probably for future sets I think I'm just going to list some commands that I found helpful, and some configurations that made my SQL server unique.
+
+first and foremost, sudo apt install mysql-server to install the packages and dependencies including the engine that mysql runs on. It should actomatically turn the mysql daemon on but if not systemctl start mysql should do the trick.
+sudo service mysql status, cat /var/log/mysql/error.log and netstat -la | grep 3306 for diagnostics ___ We were lsitening on port 3306 and outputting mysqld logs to /var/log/mysql/error.log but I'll get to the specifics in a bit.
+of course to log into the sql shell you can do it a couple of ways such as /usr/run/mysql -u root -p or simply mysql -u root -p.
+
+
+
+Now onto the config files:
+
+First before I configured anything I backed up the install so I wouldn't have to download the package again, I used cp /etc/mysql /root/mysql to make a fresh install local backup in the root directory.
+In my.cnf found in the default /etc/mysql/ directory we made these configs:
+
+    [mysqld]
+    ssl_ca=ca.pem
+    ssl_cert=server-cert.pem
+    ssl_key=server-key.pem
+    require_transport_security=ON
+    tls_version=TLSv1.3
+    tls_ciphersuites=TLS_AES_256_GCM_SHA384
+
+In mysqld.cnf found in /etc/mysql/mysql.conf.d/ we added these commands:
+
+    user = mysql
+    pid-file = /var/run/mysqld/mysqld.sock
+    port = 3306
+    datadir = /var/lib/mysql
+    bind_address = 127.0.0.1 #the loopback address for localhost for a machine to refer to itself.
+    log_error = /var/log/mysql/error.log
+
+
+
+We started the mysql.service using systemctl and then we attempted to log in for the first time, immediately I was shot an error in the syslog talking about the mysql service exited with an error because it was unable to access a socket, which, at the time I had no clue what it was referring to other then knowing a socket dealt with assigning an ip and port to a particular application.
+After some research we found out we configured the bind_address incorrectly for using SQL from a local machine and not over the net we shoudld've left it al 127.0.0.1 instead of jumping ahead of ourselves and adding the ip address of the server for how it will be configured in the near future.
+okay, great so after troublingshooting with find / -type s looking for sockets that weren't there and using netstat to confirm nothing else was engaged on port 3306 then defaulting the ip address back to 127.0.0.1 we fixed that, restart the service, attempt to log in, guess what? another error.
+Now what? well the mysql service was trying to authenticate me as the root user but it had no entry for a password for the rootuser even though I was never able to set one in the first place because this was my first time trying to get into the mysql shell.
+This is where the stack overflow community came in to save the day for me.I found an old post about being locked out of mysql and the answer was rather simple and seemingly a great security concern going forward I'll have to remove write permissions from the config files for mysql or jail access to another root folder for untrusted guests.
+Turns out you can bypass authentication and remove it completely by simply adding skip_grant_tables to the my.cnf file at the bottom of the file. Then log into the mysql shell (after restarting the servcie of course) and from there use mysql> flush privileges; and mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewPassword';.
+Once you've configured your new password you should immediately delete the skip_grant_tables command in the my.cnf file and restart the service then block off access to that file for anyone whom you don't trust with editing it.
+All in all it worked out, I was able to get into the mysql database and begin adding data into the tables for safekeeping and future reference, I may go back and reconfigure the 127.0.0.1 address now to the server's ip address for implemnetation into my homelab so I can access it remotely, or at least that's how I understand the documentation, who knows maybe I'll run into a different problem later when I move the VM to my hardware server running esxi. That's tomorrows problem though, i'm still learning one piece at a time.
+
+
+
+
+Links that together, helped me establish my first mysql server:
+
+https://docs.rackspace.com/docs/install-mysql-server-on-the-ubuntu-operating-system
+https://ubuntu.com/server/docs/databases-mysql
+https://dev.mysql.com/doc/refman/8.0/en/using-encrypted-connections.html
+https://dev.mysql.com/doc/refman/8.0/en/using-encrypted-connections.html#mandatory-encrypted-connections
+https://dev.mysql.com/doc/refman/8.0/en/encrypted-connection-protocols-ciphers.html
+https://stackoverflow.com/a/41793945/12842732
