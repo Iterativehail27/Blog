@@ -32,7 +32,7 @@ In mysqld.cnf found in /etc/mysql/mysql.conf.d/ we added these commands:
 
 
 
-We started the mysql.service using systemctl and then we attempted to log in for the first time, immediately I was shot an error in the syslog talking about the mysql service exited with an error because it was unable to access a socket, which, at the time I had no clue what it was referring to other then knowing a socket dealt with assigning an ip and port to a particular application.
+I started the mysql.service using systemctl and then we attempted to log in for the first time, immediately I was shot an error in the syslog talking about the mysql service exited with an error because it was unable to access a socket, which, at the time I had no clue what it was referring to other then knowing a socket dealt with assigning an ip and port to a particular application.
 After some research we found out we configured the bind_address incorrectly for using SQL from a local machine and not over the net we shoudld've left it at 127.0.0.1 instead of jumping ahead of ourselves and adding the ip address of the server for how it will be configured in the near future.
 okay, great so after troublingshooting with find / -type s looking for sockets that weren't there and using netstat to confirm nothing else was engaged on port 3306 then defaulting the ip address back to 127.0.0.1 we fixed that, restart the service, attempt to log in, guess what? another error.
 Now what? well the mysql service was trying to authenticate me as the root user but it had no entry for a password for the rootuser even though I was never able to set one in the first place because this was my first time trying to get into the mysql shell.
