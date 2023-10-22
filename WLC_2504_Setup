@@ -1,0 +1,18 @@
+Today I was able to set up a cisco 2504 WLC through no shortage of initial set-up troubleshooting.
+It was fairly long process of figuring out what my model was, what version of IOS I was running and what the community and Cisco were saying about bugs encountered while APs failed to join for one reason or another.
+My primary concern was the DTLS tunnel failure. ```%DTLS-5-ALERT: Received FATAL : Certificate unknown alert``` was the alert displayed after typing in 'debug capwap events enable'.
+So long story short, I found out about debugging the pki certificate messages using 'debug pm pki certicate enable' to check to see if the certificate on the ap was invalid. low and behold it expired in '22.
+The next step I took was to disable NTP and reset the time in the https web browser. I set the time back five years to 2018 and in the security panel under ap policies chose to accept ssc's mic's and lsc's. 
+After a reload the AP associated with my cisco 2504 WLC!
+
+Now to create the WLans. 
+First I determined I wanted three Wlans, Internal, guests and management.
+I created each in their own vlans 100, 10 and 2.
+I chose to use wpa/wpa2 PSK instead of 802.1x because I haven't set up the tacacs+ server yet, that will be done in the future as I study more about networking and configure active directory to be used as such in azure 104.
+I attached the wlans to the preconfigured logical interfaces relative to the SSID's internal, guests and management with their associated ip addresses, gateways and logical interface ip addresses that match their subnets on my network diagram.
+Then I clicked apply and saved the configuration to which then I was able to see the advertized wlans 
+
+For the DS1 switch config I had to set up a VLAN100 pool for the management vlan dhcp server.
+I specified the DNS server, domain name, network subnet, default-gateway, and option 43 to tell the hosts where the WLC was located even though I don't believe it was necessary but I wanted to rule out all possible errors as early as possible before attempting to connect, so that's what I did.
+I then added a forwarding rule for ports 5246 and 5247 for the CAPWAP tunnel to be established to offer a control and data tunnel for the endhosts to use to establish connections and send data onto the wired network from an access point. the command was 'ip forward-protocol UDP 5246' & 'ip forward-protocol 5247'. 
+That's it for today, I have some more studying to do with the SRX320 in my homelab on juniper open learning.
