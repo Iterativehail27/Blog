@@ -42,7 +42,7 @@ Add the following lines
   LogLevel INFO
 ##(optional)##-DO-NOT-ADD-THIS-LINE
   ForceCommand internal-sftp (for making sftp the ONLY usable ssh based protocol)
-  AllowTCPForwarding no (to disable port forwarded access to the server but you should still explicitly deny unallowed users)
+  AllowTCPForwarding no (to disable port forwarded access to the server that could apply encryption to unauthorized applications in the network stack which would go undetected but you should still explicitly deny unallowed users)
   X11Forwarding yes (If you want a graphical screen forwarded)
 '
 
