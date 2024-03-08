@@ -1,0 +1,61 @@
+I learned how to create a jailed or chrooted repository for SSH clients today. It is a simple, yet manually intensive process to create a new root directory as well as to gather up all of the ingredients
+needed to create a custom and functional shell that is capable of doing least-privledged work as it pertains to the task of the operator who would be signing in to that machine.
+I will now list the process in order of completion
+
+1) Make directories for the SSH User you plan to add to the machine:
+`mkdir -p /home/test`
+'mkdir -p /home/test/bin'
+'mkdir -p /home/test/lib64'
+'mkdir -p /home/test/dev'
+'mkdir -p /home/test/etc
+'mkdir -p /home/test/home/user'
+
+2) Change the ownership and permissions recursively for all folders within the /home/test directory then change the user home folder directory to be only accessible and writeable by the owner
+'chown -R root:root /home/test'
+'chmod -R 0750 /home/test'
+'chown -R user:user /home/test/home/user'
+'chmod -R 0700 /home/test/home/user'
+
+3) Create dev nodes such as tty, null, zero and random within the /home/test/dev directory
+'mknod -m 666 null c 1 3'
+'mknod -m 666 tty c 5 0'
+'mknod -m 666 zero c 1 5'
+'mknod -m 666 random c 1 8'
+
+4) Copy /bin/bash to /home/test/bin
+'cp -v /bin/bash /home/test/bin'
+
+5) Add the bin/bash dependencies to the /home/test/lib64 folder
+'ldd /bin/bash (It will list the dependcies required for a bash shell)'
+'cp -v (/lib64/{listed,dependencies,here} /home/test/lib64'
+
+6) Add the passwd and group files to the /home/test/etc folder
+'cp -vf /etc/{group,passwd} /home/test/etc/'
+
+7) Now we are going to open the sshd folder for the server options of ssh that are read by the sshd daemon service and edit them with your favorite text editor.
+'vi /etc/ssh/sshd_config'
+Add the following lines
+'Match User User
+  PasswordAuthentication yes
+  PubKeyAuthentication no
+  ChrootDirectory /home/test
+  LogLevel INFO
+##(optional)##-DO-NOT-ADD-THIS-LINE
+  ForceCommand internal-sftp (for making sftp the ONLY usable ssh based protocol)
+  AllowTCPForwarding no (to disable port forwarded access to the server but you should still explicitly deny unallowed users)
+  X11Forwarding yes (If you want a graphical screen forwarded)
+'
+
+8) Restart the sshd service to update parameters in the config file
+'Systemctl restart sshd'
+
+9) You should now have a basic, accessible but chrooted or jailed ssh shell for the permitted users. However we it's not very useful without commands, so let's add some.
+'cp -v /bin/{whatever commands you want to add functionality for} /home/test/bin/'
+
+10) Now let's grab the dependencies again for the newly added binaries
+'ldd /bin/{Whatever-you-want-to-add} (It will list the dependcies required for the {Commands})'
+'cp -v (/lib64/{listed,dependencies,here} /home/test/lib64'
+
+And you're done! You now have a fully secured environment for which SSH users can access with the appropriate credentials and cannot do anything outside of the environment that 
+you didn't explicitly allow, however they can use whatever commands you have given them in the /home/test/bin directory and upload/download their own files and even make new directories within the jailed environment 
+to organize their space if you, once again, provided the binary in /home/test/bin and the dependencies in /home/test/lib64.
